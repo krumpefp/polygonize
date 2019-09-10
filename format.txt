@@ -1,0 +1,101 @@
+                    ----    POLYGON TEXT FORMAT     ----                       
+
+# Description:
+
+    Textual description of a polygon arangement in two dimensions.
+    
+    A POLYGON arrangement consists of a single POINT, a line defined by a list
+    of subsequent points (POLYLINE) or a closed POLYGON bounding a FACE in the
+    arrangement.
+    
+    FACES are completely bounded by an bounding POLYGON. The only exception is
+    the INFINITE FACE which is all the free space not covered by any other
+    FACE.
+
+    A POLYGON may have inner HOLEs - i.e. a face bounded by another POLYGON
+    which is completely contained in the bounded face.
+    Further a HOLE may consist of several POLYGONs which together completely
+    fill the shape of the HOLE.
+    A HOLE may also consist of only a POINT or POLYLINE.
+
+
+# The text file format:
+
+    For a FACE the text format defines an id and the boundary as a sequence of
+    x, y coordinates of the defining points when traversing the boundary
+    polygon in counterclockwise order.
+    Then it specifies the number of holes. For each hole its boundary is given
+    as a clockwise traversation of the defining points x, y coordinates.
+    The faces defining the HOLE are given by their ID. In case of the hole
+    being just a POLYLINE or a POINT this is empty.
+
+
+    ## The FACE record
+
+    A FACE record is defined as follows (each value is separated by a blank):
+        - 1st line:
+            ID      -   The ID of the FACE
+            Bound   -   The boundary of the face in 'x y x y x y ...' of a
+                        counterclockwise traversal of the boundary POLYGON.
+        - 2nd line:
+            #HOLES  -   The number of holes of the FACE
+    
+    The following 2*#HOLEs many lines are describing the HOLEs. Each HOLE is
+    defined in two lines as follows:
+        - 1st line:
+            Bound   -   lockwise traversal of the bounding POLYGON of the hole
+                        given by 'x y x y x y x y ...'
+        - 2nd line:
+            IDs     -   IDs of the FACEs contained in the HOLE.
+                        The line may be empty if the HOLE is a POLYLINE or
+                        a single POINT
+
+
+    ## Special case: The INFINITE FACE
+
+    Each file is starting with the INFINITE FACE. In this case the first line
+    of the FACE record is skipped. So the INFINITE FACE has no specified ID
+    and no bounding POLYGON.
+
+    ## Example:
+
+    Let an example arrangement given by the edges as follows:
+
+      # x y x y         of the edge source and target vertex
+
+        0 0 0 6         x --------------------- x
+        0 6 6 6         |                       |
+        6 6 6 0         |   x ------------- x   |
+        6 0 0 0         |   |             / |   |
+                        |   |   x       /   |   |
+        1 1 5 1         |   |         /     |   |
+        5 1 5 5         |   |       /   x   |   |
+        5 5 1 1         |   |     /   /     |   |
+        1 1 1 5         |   |   /   x       |   |
+        1 5 5 5         |   | /             |   |    
+                        |   x ------------- x   |
+        3 2 4 3         |                       |
+        2 4 2 4         x --------------------- x
+               
+        A corresponding representation is as follows:
+        Please note that the lines starting with a # are comments and not
+        contained in the standard output.
+
+            1                           # number of holes in the INFINITE FACE
+            0 0 0 6 6 6 6 0 0 0         # boundary of the first HOLE
+            3                           # ID of the FACE defining the HOLE
+            # Record of the FACE 3
+            3 6 6 0 6 0 0 6 0 6 6       # ID (3) and its boundary
+            1                           # number of holes in the FACE
+            1 1 1 5 5 5 5 1 1 1         # boundary of the first HOLE
+            1 2                         # IDs of the two faces defining the HOLE
+            # Record of the FACE 1
+            1 5 5 1 1 5 1 5 5           # ID (1) and its boundary
+            1                           # number of holes in the FACE
+            3 2 4 3 3 2                 # boundary of the HOLE
+                                        # the HOLE does not have enclosed FACEs
+            # Record of the face 2      
+            2 5 5 1 5 1 1 5 5           # ID (2) and its boundary
+            1                           # number of holes in the FACE
+            2 4                         # boundary (i.e. the single point)
+                                        # the HOLE does not have enclosed FACEs
